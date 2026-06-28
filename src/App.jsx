@@ -2,18 +2,16 @@ import { useState } from 'react';
 import './App.css';
 
 export default function App() {
-  // Estado inicial com um item
-  const [itens, setItens] = useState([
-    { id: 1, text: 'Estudar React' }
-  ]);
-
+  const [itens, setItens] = useState([{ id: 1, text: 'Estudar React' }]);
   const [newItem, setNewItem] = useState('');
+  const [editId, setEditId] = useState(null);
+  const [textEdited, setTextEdited] = useState('');
 
-  // Função para adicionar um novo item
+  // Adicionar novo item
   function addNewItem() {
     if (newItem.trim() !== '') {
       const novo = {
-        id: Date.now(), // ou crypto.randomUUID()
+        id: Date.now(),
         text: newItem
       };
       setItens((prev) => [...prev, novo]);
@@ -21,9 +19,26 @@ export default function App() {
     }
   }
 
-  // Função para remover item pelo ID
+  // Remover item
   const removeItem = (id) => {
     setItens((prevItens) => prevItens.filter((item) => item.id !== id));
+  };
+
+  // Iniciar edição
+  const startEdition = (id, text) => {
+    setEditId(id);
+    setTextEdited(text);
+  };
+
+  // Salvar edição
+  const saveEdition = (id) => {
+    setItens((prevItens) =>
+      prevItens.map((item) =>
+        item.id === id ? { ...item, text: textEdited } : item
+      )
+    );
+    setEditId(null);
+    setTextEdited('');
   };
 
   return (
@@ -40,8 +55,21 @@ export default function App() {
       <ul>
         {itens.map((item) => (
           <li key={item.id}>
-            {item.text}
-            <button onClick={() => removeItem(item.id)}>Excluir</button>
+            {editId === item.id ? (
+              <>
+                <input
+                  value={textEdited}
+                  onChange={(e) => setTextEdited(e.target.value)}
+                />
+                <button onClick={() => saveEdition(item.id)}>Salvar</button>
+              </>
+            ) : (
+              <>
+                <span>{item.text}</span>
+                <button onClick={() => startEdition(item.id, item.text)}>Editar</button>
+                <button onClick={() => removeItem(item.id)}>Excluir</button>
+              </>
+            )}
           </li>
         ))}
       </ul>
